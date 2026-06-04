@@ -9,7 +9,7 @@ public class LocBundle<TEntry>(IReadOnlyDictionary<string, LocTableGroup<TEntry>
     : IReadOnlyDictionary<string, LocTableGroup<TEntry>>
     where TEntry : ILocEntry
 {
-    public static LocBundle<T> Create<T>(ILocBundleProducer<T> producer) where T : ILocEntry
+    public static LocBundle<TEntry> Create(ILocBundleProducer<TEntry> producer)
     {
         return producer.Produce();
     }
