@@ -8,4 +8,9 @@ public interface ILocBundleProcessor<TEntryIn, TEntryOut>
     where TEntryOut : ILocEntry
 {
     LocBundle<TEntryOut> Process(LocBundle<TEntryIn> table);
+
+    public class FromDelegate(Func<LocBundle<TEntryIn>, LocBundle<TEntryOut>> func) : ILocBundleProcessor<TEntryIn, TEntryOut>
+    {
+        public LocBundle<TEntryOut> Process(LocBundle<TEntryIn> table) => func(table);
+    }
 }
