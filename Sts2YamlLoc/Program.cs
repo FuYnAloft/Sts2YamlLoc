@@ -33,7 +33,7 @@ app.AddCommand("baselib", (
                 new (["components"], new MinionLibComponentIdFormatter(namespaceTop))
             );
 
-            LocBundle<NestedEntry>
+            LocBundle
                 .Create(reader)
                 .Pipe(bundleFormatters)
                 .Pipe(new MinionLibComponentMerger())
@@ -55,7 +55,7 @@ app.AddCommand("baselib", (
                 new (["components"], new MinionLibComponentIdFormatter(namespaceTop))
             );
 
-            LocBundle<FlatEntry>
+            LocBundle
                 .Create(reader)
                 .Pipe(new MinionLibComponentSplitter())
                 .Pipe(bundleFormatters)

@@ -42,3 +42,9 @@ public class LocBundle<TEntry>(IReadOnlyDictionary<string, LocTableGroup<TEntry>
     public IEnumerable<string> Keys => groups.Keys;
     public IEnumerable<LocTableGroup<TEntry>> Values => groups.Values;
 }
+
+public static class LocBundle
+{
+    public static LocBundle<TEntry> Create<TEntry>(ILocBundleProducer<TEntry> producer) where TEntry : ILocEntry =>
+        producer.Produce();
+}
