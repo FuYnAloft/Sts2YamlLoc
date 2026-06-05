@@ -2,10 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace Sts2YamlLoc.Formatters.ModelId;
 
-public sealed partial class RitsuIdFormatter(string modid, string category, int pos = 0)
+public sealed partial class RitsuLibIdFormatter(string modid, string category, int pos = 0)
     : PrefixedIdFormatter(BuildPrefix(modid, category), pos)
 {
-    public static string BuildPrefix(string modid, string category) =>
+    private static string BuildPrefix(string modid, string category) =>
         $"{NormalizePublicStem(modid)}_{SlugifyCategory(category)}_";
 
     [GeneratedRegex("[^A-Za-z0-9]+")]
@@ -20,7 +20,7 @@ public sealed partial class RitsuIdFormatter(string modid, string category, int 
     [GeneratedRegex("_+")]
     private static partial Regex RepeatedUnderscoreRegex();
 
-    public static string NormalizePublicStem(string value)
+    private static string NormalizePublicStem(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
 
@@ -31,7 +31,7 @@ public sealed partial class RitsuIdFormatter(string modid, string category, int 
         return normalized.Trim('_').ToUpperInvariant();
     }
 
-    public static string SlugifyCategory(string category)
+    private static string SlugifyCategory(string category)
     {
         if (category.All(char.IsUpper)) return category;
 
