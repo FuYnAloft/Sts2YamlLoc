@@ -34,7 +34,7 @@ public sealed class YamlLocBundleReader(string rootPath) : ILocBundleProducer<Ne
                 IList<NestedEntry> entries = new List<NestedEntry>();
                 if (obj is IDictionary<object, object> dict)
                 {
-                    entries = ExtractEntries(dict);
+                    entries = StructureHelper.ExtractEntries(dict);
                 }
 
                 tables[tableName] = new LocTable<NestedEntry>(entries);
@@ -44,39 +44,5 @@ public sealed class YamlLocBundleReader(string rootPath) : ILocBundleProducer<Ne
         }
 
         return new LocBundle<NestedEntry>(groups);
-    }
-
-    public static IList<NestedEntry> ExtractEntries(object? node)
-    {
-        var result = new List<NestedEntry>();
-        if (node is not IDictionary<object, object> dict)
-            return result;
-
-        Recurse(dict, []);
-        return result;
-
-        void Recurse(IDictionary<object, object> current, List<string> path)
-        {
-            foreach (var kv in current)
-            {
-                var key = kv.Key.ToString() ?? string.Empty;
-                var value = kv.Value;
-                var newPath = new List<string>(path) { key };
-
-                switch (value)
-                {
-                    case IDictionary<object, object> childDict:
-                        Recurse(childDict, newPath);
-                        break;
-                    case string s:
-                        result.Add(new NestedEntry(newPath, s));
-                        break;
-                    default:
-                        // other scalar types
-                        result.Add(new NestedEntry(newPath, value.ToString() ?? string.Empty));
-                        break;
-                }
-            }
-        }
     }
 }

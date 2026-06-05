@@ -7,7 +7,11 @@ namespace Sts2YamlLoc.Options;
 public enum ConversionDirection
 {
     YamlToJson,
-    JsonToYaml
+    JsonToYaml,
+    NestedJsonToJson,
+    JsonToNestedJson,
+    YamlToNestedJson,
+    NestedJsonToYaml
 }
 
 public static class ConversionDirectionExtensions
@@ -17,12 +21,21 @@ public static class ConversionDirectionExtensions
         public bool IsNestedToFlat => direction switch
         {
             ConversionDirection.YamlToJson => true,
+            ConversionDirection.NestedJsonToJson => true,
             _ => false
         };
 
         public bool IsFlatToNested => direction switch
         {
             ConversionDirection.JsonToYaml => true,
+            ConversionDirection.JsonToNestedJson => true,
+            _ => false
+        };
+
+        public bool IsNestedToNested => direction switch
+        {
+            ConversionDirection.YamlToNestedJson => true,
+            ConversionDirection.NestedJsonToYaml => true,
             _ => false
         };
 
@@ -31,6 +44,13 @@ public static class ConversionDirectionExtensions
             {
                 ConversionDirection.YamlToJson => ConversionDirection.JsonToYaml,
                 ConversionDirection.JsonToYaml => ConversionDirection.YamlToJson,
+
+                ConversionDirection.NestedJsonToJson => ConversionDirection.JsonToNestedJson,
+                ConversionDirection.JsonToNestedJson => ConversionDirection.NestedJsonToJson,
+
+                ConversionDirection.YamlToNestedJson => ConversionDirection.NestedJsonToYaml,
+                ConversionDirection.NestedJsonToYaml => ConversionDirection.YamlToNestedJson,
+
                 _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
             };
 
@@ -39,6 +59,7 @@ public static class ConversionDirectionExtensions
             return direction switch
             {
                 ConversionDirection.JsonToYaml => new JsonLocBundleReader(rootPath),
+                ConversionDirection.JsonToNestedJson => new JsonLocBundleReader(rootPath),
                 _ => throw new InvalidOperationException($"Cannot read flat entries from {direction}")
             };
         }
@@ -48,6 +69,9 @@ public static class ConversionDirectionExtensions
             return direction switch
             {
                 ConversionDirection.YamlToJson => new YamlLocBundleReader(rootPath),
+                ConversionDirection.YamlToNestedJson => new YamlLocBundleReader(rootPath),
+                ConversionDirection.NestedJsonToJson => new NestedJsonLocBundleReader(rootPath),
+                ConversionDirection.NestedJsonToYaml => new NestedJsonLocBundleReader(rootPath),
                 _ => throw new InvalidOperationException($"Cannot read nested entries from {direction}")
             };
         }
@@ -57,6 +81,7 @@ public static class ConversionDirectionExtensions
             return direction switch
             {
                 ConversionDirection.YamlToJson => new JsonLocBundleWriter(rootPath),
+                ConversionDirection.NestedJsonToJson => new JsonLocBundleWriter(rootPath),
                 _ => throw new InvalidOperationException($"Cannot write flat entries to {direction}")
             };
         }
@@ -66,6 +91,9 @@ public static class ConversionDirectionExtensions
             return direction switch
             {
                 ConversionDirection.JsonToYaml => new YamlLocBundleWriter(rootPath),
+                ConversionDirection.JsonToNestedJson => new NestedJsonLocBundleWriter(rootPath),
+                ConversionDirection.YamlToNestedJson => new NestedJsonLocBundleWriter(rootPath),
+                ConversionDirection.NestedJsonToYaml => new YamlLocBundleWriter(rootPath),
                 _ => throw new InvalidOperationException($"Cannot write nested entries to {direction}")
             };
         }

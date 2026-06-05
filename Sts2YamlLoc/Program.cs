@@ -66,6 +66,14 @@ app.AddCommand("baselib", (
         return 0;
     }
 
+    if (direction.IsNestedToNested)
+    {
+        LocBundle
+            .Create(direction.GetNestedReader(inputDir))
+            .Sink(direction.GetNestedWriter(outputDir));
+        return 0;
+    }
+
     Console.Error.WriteLine("未知的转换方向。");
     return 1;
 });

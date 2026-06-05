@@ -3,9 +3,9 @@ using Sts2YamlLoc.Models.Entries;
 using Sts2YamlLoc.Models.Loc;
 using Sts2YamlLoc.Pipeline.Interfaces;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Core.Events;
 
 namespace Sts2YamlLoc.IO;
 
@@ -25,52 +25,12 @@ public sealed class YamlLocBundleWriter(string rootPath) : ILocBundleConsumer<Ne
 
             foreach (var (tableName, locTable) in group)
             {
-                var mapping = BuildNestedMapping(locTable);
+                var mapping = StructureHelper.BuildNestedMapping(locTable);
                 var text = serializer.Serialize(mapping);
                 File.WriteAllText(Path.Combine(langDir, tableName + ".yaml"), text, Encoding.UTF8);
             }
         }
     }
-
-    public static object BuildNestedMapping(IEnumerable<NestedEntry> entries)
-    {
-        var root = new Dictionary<string, object>();
-
-        foreach (var entry in entries)
-        {
-            if (entry.Key.Count == 0)
-                continue;
-
-            IDictionary<string, object> current = root;
-            for (var i = 0; i < entry.Key.Count - 1; i++)
-            {
-                var part = entry.Key[i];
-                if (!current.TryGetValue(part, out var next))
-                {
-                    var d = new Dictionary<string, object>();
-                    current[part] = d;
-                    current = d;
-                }
-                else if (next is IDictionary<string, object> dict)
-                {
-                    current = dict;
-                }
-                else
-                {
-                    // conflict: existing scalar where we need mapping - overwrite with mapping
-                    var d = new Dictionary<string, object>();
-                    current[part] = d;
-                    current = d;
-                }
-            }
-
-            var leaf = entry.Key[^1];
-            current[leaf] = entry.Value;
-        }
-
-        return root;
-    }
-
 
     private sealed class LiteralStringTypeConverter : IYamlTypeConverter
     {
