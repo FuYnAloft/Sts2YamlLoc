@@ -4,7 +4,7 @@ using Sts2YamlLoc.Pipeline.Interfaces;
 
 namespace Sts2YamlLoc.Pipeline.Mappers;
 
-public sealed class LocTableMapper<TEntryIn, TEntryOut>(
+public class LocTableMapper<TEntryIn, TEntryOut>(
     Func<string, string, LocTable<TEntryIn>, LocTable<TEntryOut>> mapper)
     : ILocBundleProcessor<TEntryIn, TEntryOut>
     where TEntryIn : ILocEntry

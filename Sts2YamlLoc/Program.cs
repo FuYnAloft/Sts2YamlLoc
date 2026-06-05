@@ -5,6 +5,7 @@ using Sts2YamlLoc.IO;
 using Sts2YamlLoc.Models.Entries;
 using Sts2YamlLoc.Models.Loc;
 using Sts2YamlLoc.Pipeline.Mappers;
+using Sts2YamlLoc.Reshapers;
 
 var app = CoconaApp.Create();
 
@@ -28,12 +29,14 @@ app.AddCommand("baselib", (
                     "relics", "static_hover_tips", "characters", "monsters"
                 ], new BaseLibIdFormatter(namespaceTop)),
                 new(["gameplay_ui", "ui"], new DotFormatter()),
-                new(["ancients"], new BaseLibIdFormatter(namespaceTop, pos: 2))
+                new(["ancients"], new BaseLibIdFormatter(namespaceTop, pos: 2)),
+                new (["components"], new MinionLibComponentIdFormatter(namespaceTop))
             );
 
             LocBundle<NestedEntry>
                 .Create(reader)
                 .Pipe(bundleFormatters)
+                .Pipe(new MinionLibComponentMerger())
                 .Sink(writer);
             return 0;
         }
@@ -48,11 +51,13 @@ app.AddCommand("baselib", (
                     "relics", "static_hover_tips", "characters", "monsters"
                 ], new BaseLibIdFormatter(namespaceTop)),
                 new(["gameplay_ui", "ui"], new DotFormatter()),
-                new(["ancients"], new BaseLibIdFormatter(namespaceTop, pos: 2))
+                new(["ancients"], new BaseLibIdFormatter(namespaceTop, pos: 2)),
+                new (["components"], new MinionLibComponentIdFormatter(namespaceTop))
             );
 
             LocBundle<FlatEntry>
                 .Create(reader)
+                .Pipe(new MinionLibComponentSplitter())
                 .Pipe(bundleFormatters)
                 .Sink(writer);
             return 0;
