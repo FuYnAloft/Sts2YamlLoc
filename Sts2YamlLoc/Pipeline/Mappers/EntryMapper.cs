@@ -5,75 +5,85 @@ using Sts2YamlLoc.Pipeline.Interfaces;
 namespace Sts2YamlLoc.Pipeline.Mappers;
 
 /// <summary>
-/// Processor that applies all matching converters sequentially for each entry.
-/// Requires input and output entry type to be the same so conversions can be chained.
+/// Processor that applies the first matching converter for each entry.
+/// Supports different input and output entry types (TEntryIn -> TEntryOut).
 /// </summary>
-public sealed class EntryMapper<TEntry>(
-    params (Func<string, string, TEntry, bool> Predicate, IEnumerable<ILocEntryConverter<TEntry, TEntry>> Converters)[] rules)
-    : ILocBundleProcessor<TEntry, TEntry>
-    where TEntry : ILocEntry
+public sealed class EntryMapper<TEntryIn, TEntryOut>(params EntryMapper<TEntryIn, TEntryOut>.Rule[] rules)
+    : ILocBundleProcessor<TEntryIn, TEntryOut>
+    where TEntryIn : ILocEntry
+    where TEntryOut : ILocEntry
 {
-    // Nested record types used by the convenience constructors
-    public sealed record Rule(IReadOnlyCollection<string>? Languages, IReadOnlyCollection<string>? TableNames, IEnumerable<ILocEntryConverter<TEntry, TEntry>> Converters);
-    public sealed record TableRule(IReadOnlyCollection<string>? TableNames, IEnumerable<ILocEntryConverter<TEntry, TEntry>> Converters);
-
-    public EntryMapper(params Rule[] rules)
-        : this(rules.Select(r => (CreatePredicate(r.Languages, r.TableNames), r.Converters)).ToArray())
+    // Positional record representing a rule (predicate + converter)
+    public sealed record Rule(
+        Func<string, string, TEntryIn, bool> Predicate,
+        ILocEntryConverter<TEntryIn, TEntryOut> Converter)
     {
+        // Convenience ctor: create Rule from languages + tableNames + converter
+        public Rule(IReadOnlyCollection<string>? languages, IReadOnlyCollection<string>? tableNames,
+            ILocEntryConverter<TEntryIn, TEntryOut> converter)
+            : this(CreatePredicate(languages, tableNames), converter)
+        {
+        }
+
+        // Convenience ctor: create Rule from tableNames + converter
+        public Rule(IReadOnlyCollection<string>? tableNames, ILocEntryConverter<TEntryIn, TEntryOut> converter)
+            : this(null, tableNames, converter)
+        {
+        }
+
+        private static Func<string, string, TEntryIn, bool> CreatePredicate(IReadOnlyCollection<string>? languages,
+            IReadOnlyCollection<string>? tableNames)
+        {
+            return (currentLanguage, currentTableName, _) =>
+                (languages == null || languages.Contains(currentLanguage)) &&
+                (tableNames == null || tableNames.Contains(currentTableName));
+        }
     }
 
-    public EntryMapper(params TableRule[] rules)
-        : this(rules.Select(r => (CreatePredicateForTables(r.TableNames), r.Converters)).ToArray())
+    public LocBundle<TEntryOut> Process(LocBundle<TEntryIn> table)
     {
-    }
-
-    public LocBundle<TEntry> Process(LocBundle<TEntry> table)
-    {
-        var groups = new Dictionary<string, LocTableGroup<TEntry>>(table.Count);
+        var groups = new Dictionary<string, LocTableGroup<TEntryOut>>(table.Count);
 
         foreach (var (language, group) in table)
         {
-            var tables = new Dictionary<string, LocTable<TEntry>>(group.Count);
+            var tables = new Dictionary<string, LocTable<TEntryOut>>(group.Count);
 
             foreach (var (tableName, locTable) in group)
             {
-                var convertedEntries = new List<TEntry>();
+                var convertedEntries = new List<TEntryOut>();
 
                 foreach (var entry in locTable)
                 {
-                    var current = entry;
+                    TEntryOut? result = default;
+                    var converted = false;
 
-                    foreach (var (predicate, converters) in rules)
+                    foreach (var (predicate, converter) in rules)
                     {
-                        if (predicate(language, tableName, current))
+                        if (predicate(language, tableName, entry))
                         {
-                            foreach (var conv in converters)
-                            {
-                                current = conv.Convert(current);
-                            }
+                            result = converter.Convert(entry);
+                            converted = true;
+                            break; // stop at first match
                         }
                     }
 
-                    convertedEntries.Add(current);
+                    if (converted && result is not null)
+                    {
+                        convertedEntries.Add(result);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Entry {entry} in language '{language}', table '{tableName}' did not match any converter rule.");
+                    }
                 }
 
-                tables[tableName] = new LocTable<TEntry>(convertedEntries);
+                tables[tableName] = new LocTable<TEntryOut>(convertedEntries);
             }
 
-            groups[language] = new LocTableGroup<TEntry>(tables);
+            groups[language] = new LocTableGroup<TEntryOut>(tables);
         }
 
-        return new LocBundle<TEntry>(groups);
-    }
-
-    private static Func<string, string, TEntry, bool> CreatePredicate(IReadOnlyCollection<string>? languages, IReadOnlyCollection<string>? tableNames)
-    {
-        return (currentLanguage, currentTableName, _) =>
-            (languages == null || languages.Contains(currentLanguage)) && (tableNames == null || tableNames.Contains(currentTableName));
-    }
-
-    private static Func<string, string, TEntry, bool> CreatePredicateForTables(IReadOnlyCollection<string>? tableNames)
-    {
-        return (_, currentTableName, _) => tableNames == null || tableNames.Contains(currentTableName);
+        return new LocBundle<TEntryOut>(groups);
     }
 }
