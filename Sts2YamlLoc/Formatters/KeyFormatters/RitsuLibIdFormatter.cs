@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Sts2YamlLoc.Formatters.ModelId;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
 public sealed partial class RitsuLibIdFormatter(string modid, string category, int pos = 0)
     : PrefixedIdFormatter(BuildPrefix(modid, category), pos)

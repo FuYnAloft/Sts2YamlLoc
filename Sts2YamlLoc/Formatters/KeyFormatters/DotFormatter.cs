@@ -1,8 +1,8 @@
 using Sts2YamlLoc.Models.Entries;
 
-namespace Sts2YamlLoc.Formatters;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
-public class DotFormatter : AbstractFormatter
+public class DotFormatter : AbstractKeyFormatter
 {
     public static DotFormatter Instance { get; } = new();
 

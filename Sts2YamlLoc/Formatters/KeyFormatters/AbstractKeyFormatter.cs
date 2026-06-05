@@ -1,9 +1,9 @@
 using Sts2YamlLoc.Models.Entries;
 using Sts2YamlLoc.Pipeline.Interfaces;
 
-namespace Sts2YamlLoc.Formatters;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
-public abstract class AbstractFormatter :
+public abstract class AbstractKeyFormatter :
     ILocEntryConverter<FlatEntry, NestedEntry>,
     ILocEntryConverter<NestedEntry, FlatEntry>
 {

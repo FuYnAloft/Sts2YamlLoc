@@ -1,8 +1,8 @@
 using Sts2YamlLoc.Models.Entries;
 
-namespace Sts2YamlLoc.Formatters.ModelId;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
-public sealed class MinionLibComponentIdFormatter(string namespaceTop) : AbstractFormatter
+public sealed class MinionLibComponentIdFormatter(string namespaceTop) : AbstractKeyFormatter
 {
     protected override NestedEntry FlatToNested(FlatEntry entry)
     {

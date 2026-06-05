@@ -1,8 +1,8 @@
 using Sts2YamlLoc.Models.Entries;
 
-namespace Sts2YamlLoc.Formatters.ModelId;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
-public class PrefixedIdFormatter(string prefix, int pos = 0) : AbstractFormatter
+public class PrefixedIdFormatter(string prefix, int pos = 0) : AbstractKeyFormatter
 {
     private readonly int _prefixLength = prefix.Length;
 

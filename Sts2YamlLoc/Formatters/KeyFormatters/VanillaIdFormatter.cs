@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using Sts2YamlLoc.Models.Entries;
 
-namespace Sts2YamlLoc.Formatters.ModelId;
+namespace Sts2YamlLoc.Formatters.KeyFormatters;
 
-public sealed partial class VanillaIdFormatter(int pos = 0) : AbstractFormatter
+public sealed partial class VanillaIdFormatter(int pos = 0) : AbstractKeyFormatter
 {
     protected override NestedEntry FlatToNested(FlatEntry entry)
     {
@@ -56,5 +56,4 @@ public sealed partial class VanillaIdFormatter(int pos = 0) : AbstractFormatter
 
         return char.ToUpperInvariant(str[0]) + str[1..];
     }
-
 }

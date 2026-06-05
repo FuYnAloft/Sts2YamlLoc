@@ -1,6 +1,5 @@
 using Cocona;
-using Sts2YamlLoc.Formatters;
-using Sts2YamlLoc.Formatters.ModelId;
+using Sts2YamlLoc.Formatters.KeyFormatters;
 using Sts2YamlLoc.Models.Entries;
 using Sts2YamlLoc.Models.Loc;
 using Sts2YamlLoc.Options;
